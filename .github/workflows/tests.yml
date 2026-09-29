@@ -1,8 +1,10 @@
 name: Tests
 
+# Runs on pull requests and on demand. Pushes are left out so that a fork's
+# Actions budget is only spent on changes that are about to be merged.
 on:
-  push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   offline-tests:

@@ -4,8 +4,6 @@ Text, image and speech generation inside a Godot 4 game, through the
 [Pollinations](https://pollinations.ai) API. Includes a **device sign-in flow** so
 each player can pay with their own Pollen instead of your key.
 
-[![Tests](https://github.com/xiaotian1171/pollinations-godot/actions/workflows/tests.yml/badge.svg)](https://github.com/xiaotian1171/pollinations-godot/actions/workflows/tests.yml)
-
 ```gdscript
 var text := PollinationsText.new()
 add_child(text)
@@ -195,7 +193,8 @@ The offline suite covers URL building, error classification, response parsing,
 the client's retry policy, image format sniffing and decoding, the speech
 request shape, the whole device flow (with scripted `authorization_pending`
 answers), and the catalogue. It never touches the network, which is what makes
-it usable in CI — see `.github/workflows/tests.yml`.
+it usable in CI — see `.github/workflows/tests.yml`, which runs the same two
+commands on every pull request.
 
 `tests/live_check.gd` is the evidence script: it prints real status codes,
 latencies, model names and payload shapes. A run on Godot 4.5 against the live
