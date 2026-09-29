@@ -1,0 +1,20 @@
+; Engine configuration file for the Pollinations add-on repository.
+; It exists so the add-on and its tests can be opened and run as a project.
+
+config_version=5
+
+[application]
+
+config/name="Pollinations for Godot"
+config/description="Text, image and speech generation for Godot games through the Pollinations API."
+run/main_scene="res://demo/main.tscn"
+config/features=PackedStringArray("4.5", "GL Compatibility")
+config/icon="res://addons/pollinations/icon.svg"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/pollinations/plugin.cfg")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

@@ -1,0 +1,27 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  offline-tests:
+    name: Offline suite (Godot 4.5, headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot 4.5
+        run: |
+          curl -sSL -o godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          mv Godot_v4.5-stable_linux.x86_64 godot
+          chmod +x godot
+          ./godot --version
+
+      - name: Import the project (builds the class cache)
+        run: ./godot --headless --path . --import
+
+      - name: Run the offline suite
+        run: ./godot --headless --path . --script tests/run_tests.gd

@@ -1,0 +1,8 @@
+# Godot editor cache and import data
+.godot/
+# Exports and their presets (may contain signing material)
+export_presets.cfg
+build/
+*.translation
+# Local credentials
+*.env
