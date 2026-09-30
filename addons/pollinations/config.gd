@@ -21,7 +21,6 @@ const ENV_APP_KEY := "POLLINATIONS_APP_KEY"
 const STORED_KEY_FILE := "user://pollinations_device_key.cfg"
 const STORED_KEY_SECTION := "pollinations"
 const STORED_KEY_FIELD := "device_key"
-const DEFAULT_APP_KEY := "pk_godot"
 
 static var _session_key: String = ""
 
@@ -78,7 +77,7 @@ static func app_key() -> String:
 	var from_env := OS.get_environment(ENV_APP_KEY).strip_edges()
 	if not from_env.is_empty():
 		return from_env
-	return DEFAULT_APP_KEY
+	return ""
 
 static func store_device_key(key: String) -> bool:
 	var config := ConfigFile.new()

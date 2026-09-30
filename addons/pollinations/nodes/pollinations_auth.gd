@@ -39,6 +39,8 @@ func sign_in() -> Dictionary:
 	var client_id := app_key.strip_edges()
 	if client_id.is_empty():
 		client_id = PollinationsConfig.app_key()
+	if client_id.is_empty():
+		return _fail(PollinationsErrors.Kind.BAD_REQUEST, "set your game's publishable app key (pk_...) before signing in", 0)
 	var start: Dictionary = await client.post_json(PollinationsUrls.device_code(), {"client_id": client_id})
 	var code := parse_device_code(start.get("json"))
 	if not code.get("ok", false):
