@@ -28,7 +28,9 @@ static var _session_key: String = ""
 ## Defaults for the model pickers; every one of them can be overridden.
 const DEFAULT_TEXT_MODEL := "nova-fast"
 const DEFAULT_IMAGE_MODEL := "tongyi-mai/z-image-turbo"
-const DEFAULT_SPEECH_MODEL := "elevenlabs/eleven-v3"
+## Speech models that the live audio catalogue serves (and that bill against
+## free pollen, unlike the paid-only ones such as `elevenlabs/eleven-v3`).
+const DEFAULT_SPEECH_MODEL := "openai/tts-1"
 const DEFAULT_VOICE := "alloy"
 
 ## Use this key for every request until `clear_api_key`. `remember` also writes

@@ -10,6 +10,11 @@ extends SceneTree
 var _finished := false
 var _failures: PackedStringArray = PackedStringArray()
 
+## A model the live audio catalogue lists, which bills against free pollen.
+const FREE_SPEECH_MODEL := "openai/tts-1"
+## Where a successful run leaves the audio it generated.
+const SPEECH_EVIDENCE_PATH := "res://tests/evidence/speech.mp3"
+
 ## Started in `_initialize`, never awaited from `_process`: the real HTTP calls
 ## suspend, and an unresolved coroutine would be read as "quit now".
 func _initialize() -> void:
@@ -171,30 +176,50 @@ func _check_speech(client: PollinationsClient) -> void:
 	if not PollinationsConfig.has_api_key():
 		print("[speech] skipped, no key")
 		return
+	await _speak(client, PollinationsConfig.DEFAULT_SPEECH_MODEL, true)
+
+## The add-on's own default first. Models outside the live audio catalogue (such
+## as `elevenlabs/eleven-v3`) need a paid top-up and answer 402; when that
+## happens the same request is repeated with a model the catalogue serves, so one
+## run shows both the refusal and a playable stream. The bytes are written to
+## tests/evidence/speech.mp3, so the run leaves the audio behind.
+func _speak(client: PollinationsClient, model: String, primary: bool) -> void:
 	var node := PollinationsSpeech.new()
 	node.client = client
+	node.model = model
 	node.response_format = "mp3"
 	get_root().add_child(node)
 	var started := _timer()
-	var result: Dictionary = await node.generate("Welcome to Pollen Village.")
+	var result: Dictionary = await node.generate("Welcome to Pollen Village, traveller.")
 	if result.get("ok", false):
-		print("[speech] ok status=%d %s bytes=%d length=%.2fs" % [
-			result.get("status"), _elapsed(started),
-			(result.get("bytes") as PackedByteArray).size(), float(result.get("length", 0.0)),
+		var bytes: PackedByteArray = result.get("bytes", PackedByteArray())
+		print("[speech] ok status=%d %s model=%s bytes=%d length=%.2fs saved=%s" % [
+			result.get("status"), _elapsed(started), model, bytes.size(),
+			float(result.get("length", 0.0)), _save(bytes, SPEECH_EVIDENCE_PATH),
 		])
-	elif int(result.get("kind", -1)) == PollinationsErrors.Kind.BALANCE:
-		# Speech models are only served to accounts with paid pollen; the
-		# request shape and the error classification are what this step checks.
-		print("[speech] 402 balance as expected for a free account: %s" % str(result.get("message", "")))
-	else:
-		print("[speech] kind=%s status=%d error=%s" % [
-			result.get("kind_name"), result.get("status"), result.get("error")
+		return
+	if int(result.get("kind", -1)) == PollinationsErrors.Kind.BALANCE:
+		print("[speech] model=%s needs paid pollen: %s" % [
+			model, str(result.get("message", "")).left(140)
 		])
-		_fail("speech generation failed")
-	node.free()
+		if primary:
+			await _speak(client, FREE_SPEECH_MODEL, false)
+		return
+	_fail("speech with %s failed: %s" % [model, str(result.get("error", ""))])
 
-## The device flow, checked without approving anything: a code is requested,
-## then polled once, which must answer "authorization_pending".
+## Writes evidence bytes into the repository, so a run can be looked at (and
+## listened to) afterwards. Returns what happened, for the log line.
+func _save(bytes: PackedByteArray, path: String) -> String:
+	if bytes.is_empty():
+		return "nothing to save"
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		return "failed (%s)" % error_string(FileAccess.get_open_error())
+	file.store_buffer(bytes)
+	file.close()
+	return path.get_file()
+
 func _check_device_flow(client: PollinationsClient) -> void:
 	var started := _timer()
 	var start: Dictionary = await client.post_json(PollinationsUrls.device_code(), {"client_id": PollinationsConfig.app_key()})

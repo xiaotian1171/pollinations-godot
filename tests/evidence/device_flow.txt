@@ -1,0 +1,3 @@
+=== Pollinations device flow, with an approval
+godot 4.5-stable (official) | app key: pk_godot
+code=LZS3DJH3 url=https://enter.pollinations.ai/device expires_in=1800s — waiting for the approval

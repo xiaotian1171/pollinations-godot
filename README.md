@@ -205,8 +205,9 @@ API produced, among others:
 - the prompt route `200` in ~1.2s with a plain answer
 - `image` `200` in ~2.8s: JPEG, 256×256, 19 113 bytes, decoded into a texture
 - catalogues: 110 text models, 18 image models, 4 audio models
-- `speech` `402` on a free account, classified as a balance failure with the
-  message the API sent (speech models need paid pollen)
+- `speech` `200` with `openai/tts-1`: mp3, 52 499 bytes, decoded into an
+  `AudioStreamMP3`; the paid-only `elevenlabs/eleven-v3` answers `402` and is
+  classified as a balance failure with the message the API sent
 - the device flow: `POST /api/device/code` `200` with `user_code`,
   `expires_in=1800`, `interval=5`, then `POST /api/device/token` `400`
   `{"error":"authorization_pending"}` while nobody had approved
@@ -228,8 +229,13 @@ tests/                       offline suite, live check, scripted transport
 
 - **Never ship a server-side key** in a released game. Use the device flow, or a
   key the player pastes.
-- Speech models require **paid pollen**; text and image models answered on a free
-  account in the run above.
+- Speech models are not all billed the same way. `openai/tts-1` and
+  `openai/tts-1-hd` draw on the ordinary pollen balance and answer `200`; most
+  others, among them `elevenlabs/eleven-v3`, `google/gemini-3.8-flash-tts`,
+  `qwen/qwen3-tts-flash`, `x-ai/grok-tts` and `hexgrad/kokoro-82m`, need a paid
+  top-up and answer `402`. The client classifies that as a balance failure rather
+  than a bug, and `tests/live_check.gd` repeats the request with `openai/tts-1` so
+  one run shows both the refusal and a playable stream.
 - Anonymous requests are rate limited and were answered `200` and `401` at
   different times; treat a key as required.
 - `PollinationsImage` sniffs JPEG, PNG, WebP, GIF and SVG. Godot cannot decode
