@@ -41,7 +41,7 @@ static func run() -> void:
 	# the app key identifies the game in the device flow
 	ProjectSettings.set_setting(PollinationsConfig.PROJECT_SETTING_APP_KEY, "")
 	if OS.get_environment(PollinationsConfig.ENV_APP_KEY).is_empty():
-		PollinationsTest.equal(PollinationsConfig.app_key(), PollinationsConfig.DEFAULT_APP_KEY, "the app key has a default")
+		PollinationsTest.equal(PollinationsConfig.app_key(), "", "no app key is assumed")
 	ProjectSettings.set_setting(PollinationsConfig.PROJECT_SETTING_APP_KEY, "pk_my_game")
 	PollinationsTest.equal(PollinationsConfig.app_key(), "pk_my_game", "the app key can be configured")
 	ProjectSettings.set_setting(PollinationsConfig.PROJECT_SETTING_APP_KEY, "")

@@ -13,6 +13,7 @@ static func _node(transport: FakeTransport) -> PollinationsAuth:
 	node.client.transport = transport.callable()
 	node.sleep = func(_seconds: float) -> void: pass
 	node.remember = false
+	node.app_key = "pk_test_game"
 	node.add_child(node.client)
 	return node
 
@@ -89,12 +90,20 @@ static func run() -> void:
 	PollinationsTest.equal(PollinationsConfig.api_key(), "sk_player", "the key is ready for the next request")
 	PollinationsTest.equal(transport.requests.size(), 5, "the poll ran until it was approved")
 	PollinationsTest.equal(str(transport.requests[0].get("url", "")), "https://enter.pollinations.ai/api/device/code", "the flow starts at the device code route")
-	PollinationsTest.equal(str(transport.body_json(0).get("client_id", "")), PollinationsConfig.DEFAULT_APP_KEY, "the app key identifies the game")
+	PollinationsTest.equal(str(transport.body_json(0).get("client_id", "")), "pk_test_game", "the app key identifies the game")
 	PollinationsTest.equal(str(transport.requests[1].get("url", "")), "https://enter.pollinations.ai/api/device/token", "the flow polls the token route")
 	PollinationsTest.equal(str(transport.body_json(1).get("device_code", "")), "dc_123", "the poll sends the device code")
 	PollinationsTest.equal(transport.header_of(4, "Authorization"), "Bearer sk_player", "the profile request is signed")
 	node.free()
 	PollinationsConfig.clear_api_key(true)
+	if OS.get_environment(PollinationsConfig.ENV_APP_KEY).is_empty():
+		transport = FakeTransport.new()
+		node = _node(transport)
+		node.app_key = ""
+		result = await node.sign_in()
+		PollinationsTest.check(not bool(result.get("ok", true)), "sign-in needs a registered app key")
+		PollinationsTest.equal(transport.requests.size(), 0, "no device request is sent without an app key")
+		node.free()
 
 	# a denied sign-in reports the failure
 	transport = FakeTransport.new()

@@ -48,8 +48,8 @@ handling, an example scene, and a **headless test suite**.
    | `pollinations/api_key` | `sk_...` for your own builds. **Do not ship this in a released game.** |
    | `pollinations/app_key` | `pk_...` app key of your game, used by the device flow. |
 
-   Both can be left empty: paste a key at runtime, use the device flow, or send
-   anonymous requests (rate limited — a key is the reliable path).
+   The API key can be empty for anonymous requests. Device sign-in requires
+   your own registered app key; the add-on has no shared default.
 
 ## Sign-in with the player's own Pollen (BYOP)
 
